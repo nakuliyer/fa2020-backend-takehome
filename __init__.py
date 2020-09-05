@@ -1,4 +1,6 @@
 from flask import Flask, redirect
+import pandas as pd
+import json
 
 import random
 
@@ -16,7 +18,22 @@ Implement an endpoint `/api/fetch` that returns the contents of `data.csv` as JS
 
 """
 
-# your work here
+@app.route('/api/fetch')
+def fetch_users_data():
+    # load data into dataframe
+    df = pd.read_csv("data.csv")
+
+    # rename/reorder columns
+    df["name"] = df["first_name"] + " " + df["last_name"]
+    df = df.drop(["first_name", "last_name", "id"], axis=1)
+    df = df[["name", "time_zone", "dept"]]
+    df.columns = ["name", "timezone", "dept"]
+
+    # format data as json
+    data_as_json = df.to_json(orient="records")
+    parsed = json.loads(data_as_json)
+    parsed = {"employees": parsed}
+    return json.dumps(parsed)
 
 """
 
